@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 # NOTE:
 # this code works for editing GeoJSON files. if intending to edit a different file type, it must be converted to
 # GeoJSON first
@@ -11,10 +5,6 @@
 # additonally, the default of this code is to edit 5-year tract census data for counties and save
 # the edited data to your coding repository
 # if intending to edit a different type of census data, must alter the code accordingly
-
-
-# In[1]:
-
 
 # to read and visualize spacial data
 import geopandas as gpd
@@ -24,9 +14,6 @@ import contextily as ctx
 
 # to give more power to your figures(plots)
 import matplotlib.pyplot as plt
-
-
-# In[7]:
 
 
 # Load the data file
