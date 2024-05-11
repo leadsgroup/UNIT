@@ -10,7 +10,7 @@ gdf_census = gpd.read_file('3combined_data_race.geojson')
 
 # Define the bounding box coordinates
 min_lon, max_lon = -119, -117
-min_lat, max_lat = 33, 35
+min_lat, max_lat = 33, 34.5
 
 # Filter the census data based on bounding box
 bbox_polygon = Polygon([(min_lon, min_lat), (max_lon, min_lat), (max_lon, max_lat), (min_lon, max_lat)])
@@ -58,10 +58,10 @@ for actype in types:
                                          linewidth=0.15,
                                          alpha=0.75,
                                          legend=True,
-                                         legend_kwds={"label": "Noise Level (dB)", "orientation": "horizontal"},
+                                         legend_kwds={"label": "Noise Level (dB)", "orientation": "vertical"},
                                          )
 
-            plt.title(data_columns + " per tract in LA AREA")
+            plt.title(data_columns)
             plt.savefig(os.path.join(folder_path, data_columns + actype+timeval+'.png'))
 
 # race_data = ['Percent Non Hispanic White alone',
