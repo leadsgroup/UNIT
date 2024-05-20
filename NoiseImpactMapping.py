@@ -18,7 +18,6 @@ gdf_census_inside_bbox = gdf_census[gdf_census['geometry'].intersects(bbox_polyg
 
 types = ['HC','SR','TR']
 timesteps = ['10','30','60']
-noise_columns = ['SEL']
 
 for actype in types:
     for timeval in timesteps:
@@ -48,12 +47,14 @@ for actype in types:
 
         # Define the data types to plot
         data_types = ['L_Amax', 'L_AeqT', 'L_AeqT_24hr', 'SEL', 'L_dn', 'L_Aeq_jetliner']
+        # data_types = ['L_AeqT']
+
 
         # Plot chloropleth maps for each data type
         for data_columns in data_types:
             plt.figure(figsize=(20, 15))
             merged_gdf_inside_bbox.plot(column=data_columns,  # Use the data column
-                                         cmap='RdYlGn_r',
+                                         cmap='plasma',
                                          edgecolor='white',
                                          linewidth=0.15,
                                          alpha=0.75,
@@ -61,19 +62,6 @@ for actype in types:
                                          legend_kwds={"label": "Noise Level (dB)", "orientation": "vertical"},
                                          )
 
-            plt.title(data_columns)
+            plt.title(data_columns,fontsize=12)
             plt.savefig(os.path.join(folder_path, data_columns + actype+timeval+'.png'))
 
-# race_data = ['Percent Non Hispanic White alone',
-#        'Percent Non Hispanic Black or African American alone',
-#        'Percent Non Hispanic American Indian and Alaska Native alone',
-#        'Percent Non Hispanic Asian alone',
-#        'Percent Non Hispanic Native Hawaiian and Other Pacific Islander alone',
-#        'Percent Non Hispanic Some Other Race alone',
-#        'Percent Non Hispanic Two or More Races', 'Percent Hispanic or Latino']
-# income_data = ['Less than $10,000', '$10,000 to $14,999',
-#        '$15,000 to $19,999', '$20,000 to $24,999', '$25,000 to $29,999',
-#        '$30,000 to $34,999', '$35,000 to $39,999', '$40,000 to $44,999',
-#        '$45,000 to $49,999', '$50,000 to $59,999', '$60,000 to $74,999',
-#        '$75,000 to $99,999', '$100,000 to $124,999', '$125,000 to $149,999',
-#        '$150,000 to $199,999', '$200,000 or more']
