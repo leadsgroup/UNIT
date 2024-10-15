@@ -1,5 +1,24 @@
 
-from dash import Dash, html, dcc
+import dash 
+from dash import Dash, html, dcc, Input, Output, Patch, clientside_callback, callback 
+import plotly.io as pio
+import dash_bootstrap_components as dbc 
+from dash_bootstrap_templates                  import load_figure_template 
+import pandas as pd  
+import os
+
+
+from Demographic_Maps    import * 
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+# Data
+# --------------------------------------------------------------------------------------------------------------------------------------------------- 
+separator                  = os.path.sep 
+technology_filename        = '..' + separator + 'Data'  + separator + 'Technology' + separator +  'Technology_Data.xlsx' 
+Census_Data                = pd.read_excel(technology_filename,sheet_name=['Commercial_Batteries','Battery_Development','Electric_Motor_Development','Commercial_SAF', 'Hydrogen']) 
+
+
+
 
 app = Dash(__name__)
 
@@ -40,6 +59,7 @@ app.layout = html.Div([
             ],
             value=[],
             multi=True,
+            id = "income_range", 
             style={'margin-bottom': '20px'}
         ),
         html.Label('Sensitive Areas'),
@@ -87,5 +107,17 @@ app.layout = html.Div([
     ], style={'padding': 10, 'flex': 1, 'border': '1px solid #d3d3d3'})
 
 ], style={'display': 'flex', 'flexDirection': 'row'})
+
+
+ 
+@callback(
+    Output("income_map", "figure"),
+    Input("income_range", "value"), 
+    Input("color-mode-switch", "value"), 
+)
+def update_battery_comparison_figure(income_range,switch_off):     
+    fig  = generate_income_map(Census_Data,income_range,switch_off)  
+    return fig
+
 if __name__ == '__main__':
     app.run(debug=True)
