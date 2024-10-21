@@ -1,11 +1,16 @@
 
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import io
+import base64
 
+# create dash app
 app = Dash(__name__)
 
-# Sample Data for Pie Charts
+# sample data for pie charts
 race_data = pd.DataFrame({
     'Race': ['Hispanic/Latino', 'Black/African American', 'White'],
     'Percentage': [30, 40, 30]
@@ -13,7 +18,7 @@ race_data = pd.DataFrame({
 
 income_data = pd.DataFrame({
     'Income Range': [
-        '0-30,000', '30,00-60,000', '60,00-90,000', '90,00-100,000'
+        '0-30,000', '30,000-60,000', '60,000-90,000', '90,000-100,000'
     ],
     'Percentage': [30, 30, 25, 15]
 })
@@ -23,10 +28,10 @@ sensitive_areas_data = pd.DataFrame({
     'Density': [40, 35, 25]
 })
 
-# Colors for the Pie Charts (cohesive color scheme)
+# colors for the pie charts
 colors = ['#636EFA', '#EF553B', '#00CC96']
 
-# Create Pie Charts with Hover and Uniform Sizes
+# create pie charts with hover and uniform sizes
 race_pie = px.pie(race_data, names='Race', values='Percentage', 
                   title='Race Distribution',
                   color_discrete_sequence=colors)
@@ -45,11 +50,38 @@ sensitive_areas_pie = px.pie(sensitive_areas_data, names='Sensitive Areas', valu
 sensitive_areas_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
 sensitive_areas_pie.update_layout(title_font_size=11, font_size=6)
 
+# load the shape file for LA County boundary
+boundary_gdf = gpd.read_file('data race la county edited/Edited_CensusData_LACounty_filtered.geojson')
+
+# function to generate a simple LA County boundary plot
+def generate_la_county_plot():
+    fig, ax = plt.subplots(figsize=(12, 12))
+    
+    # plot LA County boundaries
+    boundary_gdf.plot(ax=ax, color='lightgrey', edgecolor='black')
+    
+    # customize the plot
+    ax.set_title('LA County Boundary')
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect('equal')
+
+    # save plot to a BytesIO buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    
+    # convert to base64 to display in dash
+    encoded_img = base64.b64encode(buf.read()).decode('utf-8')
+    return f"data:image/png;base64,{encoded_img}"
+
+# app layout
 app.layout = html.Div([
 
-    # Row for Map Types and Noise Data (Left Section)
+    # row for map types and noise data (Left Section)
     html.Div([
-        # Map Types Section
+        # map types section
         html.Div([
             html.H3('Map Types'),
             dcc.Checklist(
@@ -97,7 +129,7 @@ app.layout = html.Div([
             )
         ], style={'padding': 10, 'flex': 1, 'border': '1px solid #d3d3d3'}),
 
-        # Noise Data Section
+        # noise data section
         html.Div([
             html.H3('Noise Data'),
             dcc.Checklist(
@@ -132,22 +164,36 @@ app.layout = html.Div([
 
     ], style={'display': 'flex', 'flexDirection': 'row'}),
 
-    # Row for Pie Charts (Right Section)
+    # row for pie charts and LA County Map (right Section)
     html.Div([
         html.Div([
             dcc.Graph(figure=race_pie)
-        ], style={'width': '33%', 'display': 'inline-block', 'padding': 20}),
+        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
         
         html.Div([
             dcc.Graph(figure=income_pie)
-        ], style={'width': '33%', 'display': 'inline-block', 'padding': 20}),
+        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
         
         html.Div([
             dcc.Graph(figure=sensitive_areas_pie)
-        ], style={'width': '33%', 'display': 'inline-block', 'padding': 5}),
+        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
+        
+        # LA County map section (Right corner)
+        html.Div([
+            html.H4('LA County Map'),
+            html.Img(id='county-map', style={'width': '100%', 'padding': 20})  # image container for LA County boundary
+        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10})
     ], style={'display': 'flex', 'justify-content': 'space-between'})
 
 ])
 
+# callback to update the la county map???
+@app.callback(
+    Output('county-map', 'src'),
+    [Input('county-map', 'id')]  # need to replace with actual data
+)
+def update_county_map(_):
+    return generate_la_county_plot()
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run_server(debug=True)
