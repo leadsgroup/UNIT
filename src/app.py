@@ -205,8 +205,7 @@ def update_battery_comparison_figure(income_range,switch_off):
     Input("noise_type_dropdown", "value")
 )
 def update_noise_map(noise_level_slider,noise_type_dropdown):
-    # You can modify this function to work without the noise type input
-    fig = generate_noise_map.generate_noise_map(Noise_Data[0], noise_level_slider, noise_type_dropdown)  # Use default or fixed noise type
+    fig = generate_noise_map.generate_noise_map(Noise_Data[0], noise_level_slider, noise_type_dropdown)
     return fig
 
 if __name__ == '__main__':
