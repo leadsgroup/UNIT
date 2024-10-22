@@ -31,5 +31,4 @@ def generate_noise_map(noise_df, selected_noise_level, noise_type):
         title=f'{noise_type} above {selected_noise_level} dB'
     )
 
-    fig.write_html(f'{noise_type}.html')
     return fig
