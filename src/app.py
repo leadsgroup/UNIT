@@ -1,4 +1,3 @@
-
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
@@ -6,6 +5,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import io
 import base64
+import os
 
 # create dash app
 app = Dash(__name__)
@@ -50,11 +50,15 @@ sensitive_areas_pie = px.pie(sensitive_areas_data, names='Sensitive Areas', valu
 sensitive_areas_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
 sensitive_areas_pie.update_layout(title_font_size=11, font_size=6)
 
-# load the shape file for LA County boundary
-boundary_gdf = gpd.read_file('data race la county edited/Edited_CensusData_LACounty_filtered.geojson')
+# check if the geojson file exists
+file_path = '/Users/avacipriani/Desktop/LEADS/UNIT/Processed_Data/data race la county/Edited_CensusData_LACounty_filtered.geojson'
+boundary_gdf = gpd.read_file(file_path)
 
 # function to generate a simple LA County boundary plot
 def generate_la_county_plot():
+    if not os.path.exists(file_path):
+        return ""  # return empty string if the file is missing
+    
     fig, ax = plt.subplots(figsize=(12, 12))
     
     # plot LA County boundaries
@@ -187,12 +191,12 @@ app.layout = html.Div([
 
 ])
 
-# callback to update the la county map???
+# callback to update the LA county map on page load
 @app.callback(
     Output('county-map', 'src'),
-    [Input('county-map', 'id')]  # need to replace with actual data
+    Input('county-map', 'id')  # trigger on page load
 )
-def update_county_map(_):
+def update_la_county_map(_):
     return generate_la_county_plot()
 
 if __name__ == '__main__':
