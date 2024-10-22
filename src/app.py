@@ -1,11 +1,6 @@
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc
 import plotly.express as px
 import pandas as pd
-import geopandas as gpd
-import matplotlib.pyplot as plt
-import io
-import base64
-import os
 
 # create dash app
 app = Dash(__name__)
@@ -49,36 +44,6 @@ sensitive_areas_pie = px.pie(sensitive_areas_data, names='Sensitive Areas', valu
                              color_discrete_sequence=colors)
 sensitive_areas_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
 sensitive_areas_pie.update_layout(title_font_size=11, font_size=6)
-
-# check if the geojson file exists
-file_path = '/Users/avacipriani/Desktop/LEADS/UNIT/Processed_Data/data race la county/Edited_CensusData_LACounty_filtered.geojson'
-boundary_gdf = gpd.read_file(file_path)
-
-# function to generate a simple LA County boundary plot
-def generate_la_county_plot():
-    if not os.path.exists(file_path):
-        return ""  # return empty string if the file is missing
-    
-    fig, ax = plt.subplots(figsize=(12, 12))
-    
-    # plot LA County boundaries
-    boundary_gdf.plot(ax=ax, color='lightgrey', edgecolor='black')
-    
-    # customize the plot
-    ax.set_title('LA County Boundary')
-    ax.set_xlabel('Longitude')
-    ax.set_ylabel('Latitude')
-    ax.set_aspect('equal')
-
-    # save plot to a BytesIO buffer
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    plt.close(fig)
-    buf.seek(0)
-    
-    # convert to base64 to display in dash
-    encoded_img = base64.b64encode(buf.read()).decode('utf-8')
-    return f"data:image/png;base64,{encoded_img}"
 
 # app layout
 app.layout = html.Div([
@@ -168,36 +133,22 @@ app.layout = html.Div([
 
     ], style={'display': 'flex', 'flexDirection': 'row'}),
 
-    # row for pie charts and LA County Map (right Section)
+    # row for pie charts (right Section)
     html.Div([
         html.Div([
             dcc.Graph(figure=race_pie)
-        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
+        ], style={'width': '33%', 'display': 'inline-block', 'padding': 10}),
         
         html.Div([
             dcc.Graph(figure=income_pie)
-        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
+        ], style={'width': '33%', 'display': 'inline-block', 'padding': 10}),
         
         html.Div([
             dcc.Graph(figure=sensitive_areas_pie)
-        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10}),
-        
-        # LA County map section (Right corner)
-        html.Div([
-            html.H4('LA County Map'),
-            html.Img(id='county-map', style={'width': '100%', 'padding': 20})  # image container for LA County boundary
-        ], style={'width': '25%', 'display': 'inline-block', 'padding': 10})
+        ], style={'width': '33%', 'display': 'inline-block', 'padding': 10}),
     ], style={'display': 'flex', 'justify-content': 'space-between'})
 
 ])
-
-# callback to update the LA county map on page load
-@app.callback(
-    Output('county-map', 'src'),
-    Input('county-map', 'id')  # trigger on page load
-)
-def update_la_county_map(_):
-    return generate_la_county_plot()
 
 if __name__ == '__main__':
     app.run_server(debug=True)
