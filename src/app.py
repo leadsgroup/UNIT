@@ -12,6 +12,7 @@ import plotly.express as px
 
 from Demographic_Maps    import * 
 from Noise_Maps import generate_noise_map
+from CensusStatPlots import piecharts
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Data
@@ -29,51 +30,12 @@ Census_Race_Data = pd.read_excel(census_race_filename, sheet_name=None)  # None 
 Census_Income_Data = pd.read_excel(census_income_filename, sheet_name=None)  # None will load all sheets
 Noise_TR_Data = pd.read_excel(noise_filename)  # None will load all sheets
 
-
+#store census data
 Census_Data = [Census_Income_Data,Census_Race_Data]
+#store aircraft noise data
 Noise_Data = [Noise_TR_Data]
 
 app = Dash(__name__)
-
-# sample data for pie charts
-race_data = pd.DataFrame({
-    'Race': ['Hispanic/Latino', 'Black/African American', 'White'],
-    'Percentage': [30, 40, 30]
-})
-
-income_data = pd.DataFrame({
-    'Income Range': [
-        '0-30,000', '30,000-60,000', '60,000-90,000', '90,000-100,000'
-    ],
-    'Percentage': [30, 30, 25, 15]
-})
-
-sensitive_areas_data = pd.DataFrame({
-    'Sensitive Areas': ['Churches', 'Hospitals/Medical Buildings', 'Schools/Universities'],
-    'Density': [40, 35, 25]
-})
-
-# colors for the pie charts
-colors = ['#636EFA', '#EF553B', '#00CC96']
-
-# create pie charts with hover and uniform sizes
-race_pie = px.pie(race_data, names='Race', values='Percentage', 
-                  title='Race Distribution',
-                  color_discrete_sequence=colors)
-race_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
-race_pie.update_layout(title_font_size=11, font_size=9)
-
-income_pie = px.pie(income_data, names='Income Range', values='Percentage', 
-                    title='Income Distribution',
-                    color_discrete_sequence=colors)
-income_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
-income_pie.update_layout(title_font_size=11, font_size=9)
-
-sensitive_areas_pie = px.pie(sensitive_areas_data, names='Sensitive Areas', values='Density', 
-                             title='Density of Sensitive Areas',
-                             color_discrete_sequence=colors)
-sensitive_areas_pie.update_traces(textinfo='percent+label', hoverinfo='label+percent', hole=.4)
-sensitive_areas_pie.update_layout(title_font_size=11, font_size=6)
 
 # app layout
 app.layout = html.Div([
@@ -129,6 +91,14 @@ app.layout = html.Div([
 
     # Graph for Race Map
     dcc.Graph(id='income_map'),  # This is where the race map will be displayed
+# Noise Data Section
+
+# Map Types Section for Race
+    html.Div([
+        html.H3('piecharts'),
+        
+    # Graph for Race Map
+    dcc.Graph(id='pie_charts') , # This is where the race map will be displayed
 # Noise Data Section
 html.Div([
     html.H3('Noise Data'),
@@ -189,15 +159,15 @@ dcc.Graph(id='noise_map'),  # This is where the noise map will be displayed
 
 ], style={'display': 'flex', 'flexDirection': 'column'})
 
-
-@callback(
-    Output("income_map", "figure"),
-    Input("income_range", "value"), 
-    Input("color-mode-switch", "value"), 
-)
-def update_battery_comparison_figure(income_range,switch_off):     
-    fig  = generate_income_map(Census_Data,income_range,switch_off)  
-    return fig
+])
+# @callback(
+#     Output("income_map", "figure"),
+#     Input("income_range", "value"), 
+#     Input("color-mode-switch", "value"), 
+# )
+# def update_battery_comparison_figure(income_range,switch_off):     
+#     fig  = generate_income_map(Census_Data,income_range,switch_off)  
+#     return fig
 
 @callback(
     Output("noise_map", "figure"),
@@ -207,6 +177,17 @@ def update_battery_comparison_figure(income_range,switch_off):
 def update_noise_map(noise_level_slider,noise_type_dropdown):
     fig = generate_noise_map.generate_noise_map(Noise_Data[0], noise_level_slider, noise_type_dropdown)
     return fig
+
+@callback(
+    Output("pie_charts", "figure1"),
+    Output("pie_charts", "figure2"),
+    Output("pie_charts", "figure3")
+    Input("noise_level_slider", "value")
+    # Input("noise_type_dropdown", "value")
+)
+def update_pie_chart(noise_level_slider):
+    fig1,fig2,fig3 = piecharts.generate_pie_chart()
+    return fig1,fig2,fig3
 
 if __name__ == '__main__':
     app.run_server(debug=True)
