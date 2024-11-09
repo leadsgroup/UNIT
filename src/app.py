@@ -1,18 +1,22 @@
 
-import dash 
+# import dash 
 from dash import Dash, html, dcc, Input, Output, Patch, clientside_callback, callback 
-import plotly.io as pio
-import dash_bootstrap_components as dbc 
-from dash_bootstrap_templates                  import load_figure_template 
+# from dash_bootstrap_templates                # import load_figure_template
 import pandas as pd  
 import os
-import plotly.express as px
 
 
 
 from Demographic_Maps    import * 
+
+
 from Noise_Maps import generate_noise_map
+from Noise_Maps import knobs_and_buttons
+
 from CensusStatPlots import piecharts
+from CensusStatPlots import knobs_and_buttons_pc
+
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Data
@@ -39,135 +43,55 @@ app = Dash(__name__)
 
 # app layout
 app.layout = html.Div([
-
-    # Map Types Section for Race
+    
+    # Section for Noise Data Controls and Graph
     html.Div([
-        html.H3('Map Types'),
-        dcc.Checklist(
-            options=[{'label': 'Topography', 'value': 'Topography'}],
-            value=['Topography'],
-            style={'margin-bottom': '10px'}
-        ),
-        html.Label('Race'),
-        dcc.Dropdown(
-            options=[
-                {'label': 'Percent Hispanic/Latino', 'value': 'Hispanic/Latino'},
-                {'label': 'Percent Black/African American', 'value': 'Black/African American'},
-                {'label': 'Percent White', 'value': 'White'},
-            ],
-            value=['Hispanic/Latino', 'Black/African American', 'White'],
-            multi=True,
-            style={'margin-bottom': '20px'}
-        ),
-        html.Label('Income'),
-        dcc.Dropdown(
-            options=[
-                {'label': '$0 - $10,000', 'value': '0-10000'},
-                {'label': '$10,000 - $20,000', 'value': '10000-20000'},
-                {'label': '$20,000 - $30,000', 'value': '20000-30000'},
-                {'label': '$30,000 - $40,000', 'value': '30000-40000'},
-                {'label': '$40,000 - $50,000', 'value': '40000-50000'},
-                {'label': '$50,000 - $60,000', 'value': '50000-60000'},
-                {'label': '$60,000 - $70,000', 'value': '60000-70000'},
-                {'label': '$70,000 - $80,000', 'value': '70000-80000'},
-                {'label': '$80,000 - $90,000', 'value': '80000-90000'},
-                {'label': '$90,000 - $100,000', 'value': '90000-100000'},
-            ],
-            value=[],
-            multi=True,
-            id="income_range",
-            style={'margin-bottom': '20px'}
-        ),
-        html.Label('Sensitive Areas'),
-        dcc.Dropdown(
-            options=[{'label': 'Churches', 'value': 'Churches'},
-                     {'label': 'Hospitals/Medical Centers', 'value': 'Hospitals/Medical Centers'},
-                     {'label': 'Schools/Universities', 'value': 'Schools/Universities'}, ],
-            value=[],
-            multi=True,
-            style={'margin-bottom': '20px'}
-        )
-    ], style={'padding': 10, 'border': '1px solid #d3d3d3', 'margin-bottom': '20px'}),  # Added margin to separate from noise section
-
-    # Graph for Race Map
-    dcc.Graph(id='income_map'),  # This is where the race map will be displayed
-# Noise Data Section
-
-# Map Types Section for Race
-    html.Div([
-        html.H3('piecharts'),
+        # Controls for Noise Selection
+        html.Div([
+            html.H3('Noise Analysis'),
+            
+            # Checklist for Vertiports and Noise Hemispheres
+            knobs_and_buttons.vertiports_checklist(),
         
-    # Graph for Race Map
-    dcc.Graph(id='pie_charts') , # This is where the race map will be displayed
-# Noise Data Section
-html.Div([
-    html.H3('Noise Data'),
+            # Dropdown for EVTOL Type Selection
+            html.Label('EVTOL Type'),
+            knobs_and_buttons.evtol_dropdown(),
+            
+            # Dropdown for Noise Type Selection
+            html.Label('Noise Type'),
+            knobs_and_buttons.noise_type_dropdown(),
+            
+            # Slider for Noise Level Per Tract
+            html.Label('Noise Level Per Tract'),
+            knobs_and_buttons.noise_slider(),
+        ], style={'width': '30%'}),  
+        
+        # Graph for Noise Map
+        html.Div([
+            dcc.Graph(id='noise_map')
+        ], style={'width': '70%', 'border-style': 'solid'}), 
+        
+    ], style={'display': 'flex', 'align-items': 'center', 'width': '80%','margin-top': '4%','margin-bottom': '8%'}),
+
+    # Section for Pie Chart Controls and Graphs
+    html.Div([
+        html.H3('Pie Charts'),
+        
+        # Controls for Pie Charts (e.g., a test button or additional controls)
+        knobs_and_buttons_pc.noise_type(),
+        knobs_and_buttons_pc.noise_slider(),
+
+        
+        # Pie Charts Displayed Inline
+        html.Div([
+            dcc.Graph(id='pie_charts1', style={'display': 'inline-block', 'width': '45%'}),
+            dcc.Graph(id='pie_charts2', style={'display': 'inline-block', 'width': '45%'}),
+        ]),
+        
+    ], style={'width': '70%'}), 
     
-    dcc.Checklist(
-        options=[{'label': 'Vertiports', 'value': 'Vertiports'}],
-        value=['Vertiports'],
-        style={'margin-bottom': '10px'}
-    ),
-    dcc.Checklist(
-        options=[{'label': 'Noise Hemispheres', 'value': 'Noise Hemispheres'}],
-        value=[],
-        style={'margin-bottom': '10px'}
-    ),
-    
-    # EVTOL Type Dropdown
-    html.Label('EVTOL Type'),
-    dcc.Dropdown(
-        options=[
-            {'label': 'Stopped Rotor', 'value': 'Stopped Rotor'},
-            {'label': 'Tilt Rotor', 'value': 'Tilt Rotor'},
-            {'label': 'Hexacopter', 'value': 'Hexacopter'},
-        ],
-        value='Stopped Rotor',
-        style={'margin-bottom': '20px'}
-    ),
+], style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center'})
 
-    # Noise Type Dropdown
-    html.Label('Noise Type'),
-    dcc.Dropdown(
-        id='noise_type_dropdown',  # New dropdown for noise type
-        options=[
-            {'label': 'L_AeqT', 'value': 'L_AeqT'},
-            {'label': 'L_AeqT_24hr', 'value': 'L_AeqT_24hr'},
-            {'label': 'SEL', 'value': 'SEL'},
-            {'label': 'L_dn', 'value': 'L_dn'},
-            {'label': 'L_Aeq_jetliner', 'value': 'L_Aeq_jetliner'},
-            {'label': 'L_Amax', 'value': 'L_Amax'}
-        ],
-        value='L_AeqT',  # Default selection
-        style={'margin-bottom': '20px'}
-    ),
-
-    # Noise Level Slider
-    html.Label('Noise Level Per Tract'),
-    dcc.Slider(
-        id='noise_level_slider',
-        min=0,
-        max=80,
-        step=1,
-        marks={i: f'{i} dB' for i in range(0, 81, 20)},
-        value=40
-    )
-], style={'padding': 10, 'border': '1px solid #d3d3d3', 'margin-bottom': '20px'}),
-
-# Graph for Noise Map
-dcc.Graph(id='noise_map'),  # This is where the noise map will be displayed
-
-], style={'display': 'flex', 'flexDirection': 'column'})
-
-])
-# @callback(
-#     Output("income_map", "figure"),
-#     Input("income_range", "value"), 
-#     Input("color-mode-switch", "value"), 
-# )
-# def update_battery_comparison_figure(income_range,switch_off):     
-#     fig  = generate_income_map(Census_Data,income_range,switch_off)  
-#     return fig
 
 @callback(
     Output("noise_map", "figure"),
@@ -179,15 +103,14 @@ def update_noise_map(noise_level_slider,noise_type_dropdown):
     return fig
 
 @callback(
-    Output("pie_charts", "figure1"),
-    Output("pie_charts", "figure2"),
-    Output("pie_charts", "figure3")
-    Input("noise_level_slider", "value")
-    # Input("noise_type_dropdown", "value")
+    Output("pie_charts1", "figure"),
+    Output("pie_charts2", "figure"),
+    Input("noise_type_dropdown_pc","value"),
+    Input("noise_level_pc","value")
 )
-def update_pie_chart(noise_level_slider):
-    fig1,fig2,fig3 = piecharts.generate_pie_chart()
-    return fig1,fig2,fig3
+def update_pie_chart(noise_type_dropdown_pc,noise_level_pc):
+    fig1,fig2 = piecharts.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc, Census_Data)
+    return fig1,fig2
 
 if __name__ == '__main__':
     app.run_server(debug=True)
