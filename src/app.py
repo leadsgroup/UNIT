@@ -109,7 +109,7 @@ def update_noise_map(noise_level_slider,noise_type_dropdown):
     Input("noise_level_pc","value")
 )
 def update_pie_chart(noise_type_dropdown_pc,noise_level_pc):
-    fig1,fig2 = piecharts.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc, Census_Data)
+    fig1,fig2 = piecharts.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc)
     return fig1,fig2
 
 if __name__ == '__main__':
