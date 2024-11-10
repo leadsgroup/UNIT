@@ -1,22 +1,12 @@
-
-# import dash 
-from dash import Dash, html, dcc, Input, Output, Patch, clientside_callback, callback 
-# from dash_bootstrap_templates                # import load_figure_template
-import pandas as pd  
+# import necessary libraries
+from dash import Dash, html, dcc, Input, Output, callback
+import dash_bootstrap_components as dbc
+import pandas as pd
 import os
 
-
-
-from Demographic_Maps    import * 
-
-
-from Noise_Maps import generate_noise_map
-from Noise_Maps import knobs_and_buttons
-
-from CensusStatPlots import piecharts
-from CensusStatPlots import knobs_and_buttons_pc
-
-
+from Demographic_Maps import *
+from Noise_Maps import generate_noise_map, knobs_and_buttons
+from CensusStatPlots import piecharts, knobs_and_buttons_pc
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Data
@@ -34,79 +24,131 @@ Census_Race_Data = pd.read_excel(census_race_filename, sheet_name=None)  # None 
 Census_Income_Data = pd.read_excel(census_income_filename, sheet_name=None)  # None will load all sheets
 Noise_TR_Data = pd.read_excel(noise_filename)  # None will load all sheets
 
-#store census data
-Census_Data = [Census_Income_Data,Census_Race_Data]
-#store aircraft noise data
+# Store census data
+Census_Data = [Census_Income_Data, Census_Race_Data]
+# Store aircraft noise data
 Noise_Data = [Noise_TR_Data]
 
-app = Dash(__name__)
+# Initialize the Dash app with Bootstrap themes
+app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])  # Try using CYBORG theme for dark mode
+app.title = "Noise and Demographic Analysis"
 
-# app layout
-app.layout = html.Div([
-    
-    # Section for Noise Data Controls and Graph
-    html.Div([
-        # Controls for Noise Selection
-        html.Div([
-            html.H3('Noise Analysis'),
-            
-            # Checklist for Vertiports and Noise Hemispheres
-            knobs_and_buttons.vertiports_checklist(),
-        
-            # Dropdown for EVTOL Type Selection
-            html.Label('EVTOL Type'),
-            knobs_and_buttons.evtol_dropdown(),
-            
-            # Dropdown for Noise Type Selection
-            html.Label('Noise Type'),
-            knobs_and_buttons.noise_type_dropdown(),
-            
-            # Slider for Noise Level Per Tract
-            html.Label('Noise Level Per Tract'),
-            knobs_and_buttons.noise_slider(),
-        ], style={'width': '30%'}),  
-        
-        # Graph for Noise Map
-        html.Div([
-            dcc.Graph(id='noise_map')
-        ], style={'width': '70%', 'border-style': 'solid'}), 
-        
-    ], style={'display': 'flex', 'align-items': 'center', 'width': '80%','margin-top': '4%','margin-bottom': '8%'}),
+# App layout
+app.layout = dbc.Container([
+    # Title and Theme Switch
+    dbc.Row([
+        dbc.Col(html.H2("Noise and Demographic Analysis", id="app-title", className="text-center my-4")),
+        dbc.Col([
+            dbc.Label("Theme:", style={"font-weight": "bold"}, id="theme-label"),
+            dcc.RadioItems(
+                id="theme-switch",
+                options=[
+                    {"label": "Light", "value": "light"},
+                    {"label": "Dark", "value": "dark"}
+                ],
+                value="dark",
+                inline=True,
+                style={'color': '#f7b731'}  # Highlighted color for better contrast
+            ),
+        ], width="auto", align="center"),
+    ], justify="between"),
 
-    # Section for Pie Chart Controls and Graphs
-    html.Div([
-        html.H3('Pie Charts'),
-        
-        # Controls for Pie Charts (e.g., a test button or additional controls)
-        knobs_and_buttons_pc.noise_type(),
-        knobs_and_buttons_pc.noise_slider(),
+    # Main content sections
+    dbc.Row([
+        # Noise Controls and Map
+        dbc.Col([
+            html.Div([
+                html.H3('Noise Analysis', className="mb-3", id="noise-analysis-header"),
+                knobs_and_buttons.vertiports_checklist(),
+                html.Label('EVTOL Type', id="evtol-label"),
+                knobs_and_buttons.evtol_dropdown(),
+                html.Label('Noise Type', id="noise-type-label"),
+                knobs_and_buttons.noise_type_dropdown(),
+                html.Label('Noise Level Per Tract', id="noise-level-label"),
+                knobs_and_buttons.noise_slider(),
+            ], style={'padding': '10px', 'border': '1px solid #555'}),
+        ], width=3, id="controls-section", style={'backgroundColor': '#2d2d2d', 'padding': '20px', 'border-radius': '8px'}),
 
-        
-        # Pie Charts Displayed Inline
-        html.Div([
-            dcc.Graph(id='pie_charts1', style={'display': 'inline-block', 'width': '45%'}),
-            dcc.Graph(id='pie_charts2', style={'display': 'inline-block', 'width': '45%'}),
-        ]),
-        
-    ], style={'width': '70%'}), 
-    
-], style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center'})
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader("Noise Map", className="bg-primary text-light", id="noise-map-header"),
+                dbc.CardBody([
+                    dcc.Graph(id='noise_map', config={'displayModeBar': False})
+                ])
+            ])
+        ], width=9),
+    ], className="my-4"),
 
+    # Pie Chart Controls and Graphs
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader("Pie Charts", className="bg-primary text-light", id="pie-chart-header"),
+                dbc.CardBody([
+                    knobs_and_buttons_pc.noise_type(),
+                    knobs_and_buttons_pc.noise_slider(),
+                    html.Div([
+                        dcc.Graph(id='pie_charts1', style={'display': 'inline-block', 'width': '45%'}),
+                        dcc.Graph(id='pie_charts2', style={'display': 'inline-block', 'width': '45%'}),
+                    ], style={'display': 'flex', 'justifyContent': 'space-between'}),
+                ])
+            ])
+        ], width=12),
+    ]),
+], fluid=True, id="app-container")
+
+# Callback to update theme, background, and text colors
+@callback(
+    [Output("app-container", "style"),
+     Output("app-title", "style"),
+     Output("theme-label", "style"),
+     Output("noise-analysis-header", "style"),
+     Output("evtol-label", "style"),
+     Output("noise-type-label", "style"),
+     Output("noise-level-label", "style"),
+     Output("noise-map-header", "style"),
+     Output("pie-chart-header", "style")],
+    [Input("theme-switch", "value")]
+)
+def update_theme(selected_theme):
+    # Define light and dark theme styles
+    if selected_theme == "light":
+        container_style = {"backgroundColor": "#f9f9f9", "color": "#2d2d2d"}
+        header_style = {"color": "#1a1a1a", "font-weight": "bold"}
+        label_style = {"color": "#333333", "font-weight": "bold"}
+        card_header_style = {"color": "#ffffff", "backgroundColor": "#007bff"}
+    else:
+        container_style = {"backgroundColor": "#1e1e1e", "color": "#ffffff"}
+        header_style = {"color": "#f0f0f0", "font-weight": "bold"}
+        label_style = {"color": "#00aaff", "font-weight": "bold"}
+        card_header_style = {"color": "#ffffff", "backgroundColor": "#007bff"}
+
+    return (
+        container_style,  # app-container
+        header_style,     # app-title
+        label_style,      # theme-label
+        header_style,     # noise-analysis-header
+        label_style,      # evtol-label
+        label_style,      # noise-type-label
+        label_style,      # noise-level-label
+        card_header_style, # noise-map-header
+        card_header_style  # pie-chart-header
+    )
 
 @callback(
     Output("noise_map", "figure"),
     Input("noise_level_slider", "value"),
     Input("noise_type_dropdown", "value")
 )
-def update_noise_map(noise_level_slider,noise_type_dropdown):
+def update_noise_map(noise_level_slider, noise_type_dropdown):
     fig = generate_noise_map.generate_noise_map(Noise_Data[0], noise_level_slider, noise_type_dropdown)
     return fig
 
 @callback(
     Output("pie_charts1", "figure"),
     Output("pie_charts2", "figure"),
-    Input("noise_type_dropdown_pc","value"),
-    Input("noise_level_pc","value")
+    Input("noise_type_dropdown_pc", "value"),
+    Input("noise_level_pc", "value")
 )
 def update_pie_chart(noise_type_dropdown_pc,noise_level_pc):
     fig1,fig2 = piecharts.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc)
