@@ -6,7 +6,8 @@ import os
 
 from Demographic_Maps import *
 from Noise_Maps import generate_noise_map, knobs_and_buttons
-from CensusStatPlots import piecharts, knobs_and_buttons_pc
+from CensusStatPlots import generate_pie_chart, knobs_and_buttons_pc
+from Dashboard_Elements import generate_dash_elements
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Data
@@ -31,27 +32,17 @@ Noise_Data = [Noise_TR_Data]
 
 # Initialize the Dash app with Bootstrap themes
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])  # Try using CYBORG theme for dark mode
-app.title = "Noise and Demographic Analysis"
+app.title = "Urban Noise Impact Tool"
 
 # App layout
 app.layout = dbc.Container([
     # Title and Theme Switch
     dbc.Row([
-        dbc.Col(html.H2("Noise and Demographic Analysis", id="app-title", className="text-center my-4")),
-        dbc.Col([
-            dbc.Label("Theme:", style={"font-weight": "bold"}, id="theme-label"),
-            dcc.RadioItems(
-                id="theme-switch",
-                options=[
-                    {"label": "Light", "value": "light"},
-                    {"label": "Dark", "value": "dark"}
-                ],
-                value="dark",
-                inline=True,
-                style={'color': '#f7b731'}  # Highlighted color for better contrast
-            ),
-        ], width="auto", align="center"),
+        dbc.Col(html.H2("Urban Noise Impact Tool", id="app-title", className="text-center my-4"),
+                style={'backgroundColor': '#00aaff', 'padding': '2%'}),
     ], justify="between"),
+
+    generate_dash_elements.color_switch(),
 
     # Main content sections
     dbc.Row([
@@ -151,7 +142,7 @@ def update_noise_map(noise_level_slider, noise_type_dropdown):
     Input("noise_level_pc", "value")
 )
 def update_pie_chart(noise_type_dropdown_pc,noise_level_pc):
-    fig1,fig2 = piecharts.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc)
+    fig1,fig2 = generate_pie_chart.generate_pie_chart(Noise_Data[0], noise_level_pc, noise_type_dropdown_pc)
     return fig1,fig2
 
 if __name__ == '__main__':
