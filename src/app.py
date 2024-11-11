@@ -39,17 +39,17 @@ app.layout = dbc.Container([
     # Title and Theme Switch
     dbc.Row([
         dbc.Col(html.H2("Urban Noise Impact Tool", id="app-title", className="text-center my-4"),
-                style={'backgroundColor': '#00aaff', 'padding': '2%'}),
-    ], justify="between"),
+                style={'backgroundColor': '#007bff', 'padding': '2%'})
+    ], justify="center"),
 
-    generate_dash_elements.color_switch(),
+    dbc.Row([generate_dash_elements.color_switch()], justify="center"),
 
     # Main content sections
     dbc.Row([
         # Noise Controls and Map
         dbc.Col([
             html.Div([
-                html.H3('Noise Analysis', className="mb-3", id="noise-analysis-header"),
+                html.H3('Noise Analysis', className="bg-primary text-light"),
                 knobs_and_buttons.vertiports_checklist(),
                 html.Label('EVTOL Type', id="evtol-label"),
                 knobs_and_buttons.evtol_dropdown(),
@@ -57,74 +57,49 @@ app.layout = dbc.Container([
                 knobs_and_buttons.noise_type_dropdown(),
                 html.Label('Noise Level Per Tract', id="noise-level-label"),
                 knobs_and_buttons.noise_slider(),
-            ], style={'padding': '10px', 'border': '1px solid #555'}),
-        ], width=3, id="controls-section", style={'backgroundColor': '#2d2d2d', 'padding': '20px', 'border-radius': '8px'}),
+            ], style={'padding': '10px', 'border': '1px solid #555'})
+        ], width=4, id="controls-section", style={'padding': '20px', 'border-radius': '8px'}),
 
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader("Noise Map", className="bg-primary text-light", id="noise-map-header"),
-                dbc.CardBody([
-                    dcc.Graph(id='noise_map', config={'displayModeBar': False})
-                ])
-            ])
-        ], width=9),
-    ], className="my-4"),
+                dbc.CardHeader("Noise Map", className="bg-primary text-light"),
+                dbc.CardBody([dcc.Graph(id='noise_map')])
+            ], style={'width': '90%', 'margin': '0 auto'})
+        ], width=8, id="noise-section"),
+    ], className="my-4 justify-content-center"),
 
     # Pie Chart Controls and Graphs
     dbc.Row([
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader("Pie Charts", className="bg-primary text-light", id="pie-chart-header"),
+                dbc.CardHeader("Pie Charts", className="bg-primary text-light"),
                 dbc.CardBody([
                     knobs_and_buttons_pc.noise_type(),
                     knobs_and_buttons_pc.noise_slider(),
                     html.Div([
                         dcc.Graph(id='pie_charts1', style={'display': 'inline-block', 'width': '45%'}),
                         dcc.Graph(id='pie_charts2', style={'display': 'inline-block', 'width': '45%'}),
-                    ], style={'display': 'flex', 'justifyContent': 'space-between'}),
+                    ], style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'})
                 ])
-            ])
-        ], width=12),
-    ]),
-], fluid=True, id="app-container")
+            ], style={'width': '100%', 'margin': '0 auto'})
+        ], width=10)
+    ], className="justify-content-center", id="pie-chart-section")
+], fluid=True, id="app-container", style={'maxWidth': '100%', 'margin': '0 auto'})
 
 # Callback to update theme, background, and text colors
 @callback(
     [Output("app-container", "style"),
      Output("app-title", "style"),
      Output("theme-label", "style"),
-     Output("noise-analysis-header", "style"),
      Output("evtol-label", "style"),
      Output("noise-type-label", "style"),
      Output("noise-level-label", "style"),
-     Output("noise-map-header", "style"),
-     Output("pie-chart-header", "style")],
+     Output('controls-section', "style"),
+     Output('pie-chart-section', "style")],
     [Input("theme-switch", "value")]
 )
-def update_theme(selected_theme):
-    # Define light and dark theme styles
-    if selected_theme == "light":
-        container_style = {"backgroundColor": "#f9f9f9", "color": "#2d2d2d"}
-        header_style = {"color": "#1a1a1a", "font-weight": "bold"}
-        label_style = {"color": "#333333", "font-weight": "bold"}
-        card_header_style = {"color": "#ffffff", "backgroundColor": "#007bff"}
-    else:
-        container_style = {"backgroundColor": "#1e1e1e", "color": "#ffffff"}
-        header_style = {"color": "#f0f0f0", "font-weight": "bold"}
-        label_style = {"color": "#00aaff", "font-weight": "bold"}
-        card_header_style = {"color": "#ffffff", "backgroundColor": "#007bff"}
-
-    return (
-        container_style,  # app-container
-        header_style,     # app-title
-        label_style,      # theme-label
-        header_style,     # noise-analysis-header
-        label_style,      # evtol-label
-        label_style,      # noise-type-label
-        label_style,      # noise-level-label
-        card_header_style, # noise-map-header
-        card_header_style  # pie-chart-header
-    )
+def theme_callback(selected_theme):
+    return generate_dash_elements.update_theme(selected_theme)
 
 @callback(
     Output("noise_map", "figure"),
