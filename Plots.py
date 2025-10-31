@@ -38,38 +38,6 @@ def plot_line_costs(thresholds, med_costs, high_costs, med_err, high_err, save_p
     plt.savefig(save_path, dpi=900)
     plt.close()
 
-# def plot_homes_impacted(thresholds, city_costs, frequency, save_path):
-#     viridis = cm.get_cmap('Paired')
-#     color_med = viridis(0.1) 
-#     color_high = viridis(0.3)
-
-#     colors=[color_med,color_high]
-
-#     plt.figure(figsize=(8, 8))
-#     plt.rcParams['axes.linewidth'] = 2.0
-#     plt.rcParams["font.family"] = "Times New Roman"
-#     parameters = {
-#         'axes.labelsize': 16,
-#         'xtick.labelsize': 14,
-#         'ytick.labelsize': 14,
-#         'axes.titlesize': 0,
-#         'xtick.major.pad': 1,
-#         'ytick.major.pad': 0,}
-
-#     plt.rcParams.update(parameters)
-
-#     for idx,operation in enumerate(city_costs):
-#         plt.plot(thresholds, operation, '-o', color=colors[idx], label=f'{frequency[idx]} Frequency', linewidth=1)
-
-#     plt.xlabel('Noise Threshold (dBA)')
-#     plt.ylabel('Estimated Single-Unit Homes Impacted')
-#     plt.grid(True, linestyle='--', alpha=0.6)
-#     plt.legend()
-#     plt.tight_layout()
-#     plt.savefig(save_path, dpi=900)
-#     plt.close()
-
-
 def plot_homes_impacted(thresholds, city_costs, frequency, save_path):
     viridis = cm.get_cmap('Paired')
     colors = [viridis(i / len(frequency)) for i in range(len(frequency))]
