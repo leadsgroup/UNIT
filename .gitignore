@@ -10,3 +10,7 @@ Processed_Data/
 Raw_Data/
 src/
 Supplemental_Data/
+
+
+# Mac
+.DS_Storegit 
