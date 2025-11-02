@@ -5,7 +5,8 @@ import os
 
 def main():
     #Define your Thresholds
-    thresholds_list = [55,60,65]
+    # thresholds_list = [55,60,65]
+    thresholds_list = [55,56,57,58,59,60,61,62,53,64,65]
     LA = {
         'City_noise_files': [
             ['LARawDat/Cumulative_TR_LA_1000ft.csv', 'Medium'],
@@ -56,8 +57,6 @@ def main():
 
 
 
-        
-
         all_results = []        
         for i, (noise_file, freq_label) in enumerate(City_noise_files):
             for j, threshold in enumerate(thresholds_list):
@@ -84,7 +83,7 @@ def main():
                 all_results.append(res)
 
         city_final = pd.concat(all_results, ignore_index=True)
-
+        # thresholds_list = [55,60,65]
         # noise Costs
         Noise_files = []
         for j,_ in enumerate(thresholds_list):
