@@ -50,7 +50,7 @@ def plot_homes_impacted(thresholds, city_costs, frequency, save_path):
     
     markers = ['o', 's', 'D', '^', 'v', 'P', '*']
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(6, 5))
     plt.rcParams['axes.linewidth'] = 2.0
     plt.rcParams["font.family"] = "Times New Roman"
     parameters = {
@@ -58,9 +58,25 @@ def plot_homes_impacted(thresholds, city_costs, frequency, save_path):
         'xtick.labelsize': 14,
         'ytick.labelsize': 14,
         'axes.titlesize': 0,
-        'xtick.major.pad': 1,
-        'ytick.major.pad': 0}
+        'xtick.major.pad': 0,
+        'ytick.major.pad': 0,}
     plt.rcParams.update(parameters)
+
+    # for idx, operation in enumerate(city_costs):
+    #     # Sort thresholds and corresponding values
+    #     sorted_pairs = sorted(zip(thresholds, operation))
+    #     sorted_thresholds, sorted_operation = zip(*sorted_pairs)
+        
+    #     plt.plot(
+    #         sorted_thresholds,
+    #         sorted_operation,
+    #         f'-{markers[idx % len(markers)]}',
+    #         color=colors[idx],
+    #         label=f'{frequency[idx]} Frequency',
+    #         linewidth=2,
+    #         markersize=6)
+
+
 
     for idx, operation in enumerate(city_costs):
         plt.plot(
@@ -70,7 +86,7 @@ def plot_homes_impacted(thresholds, city_costs, frequency, save_path):
             color=colors[idx],
             label=f'{frequency[idx]} Frequency',
             linewidth=2,
-            markersize=6,)
+            markersize=6)
 
     plt.xlabel('Noise Threshold (dBA)')
     plt.ylabel('Estimated Single-Unit Homes Impacted')
@@ -106,7 +122,7 @@ def hull_plots(DOT_Noise,geojson,bounds,threshold,city):
 
     hulls_gdf = gpd.GeoDataFrame(geometry=hulls, crs=dot_high.crs)
 
-    fig, ax = plt.subplots(figsize=(12, 12))
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     base_geojson.plot( ax=ax,
                     edgecolor='black', 
@@ -136,13 +152,13 @@ def hull_plots(DOT_Noise,geojson,bounds,threshold,city):
 
     return
 
-def struct_stats_barplot(stat_file, city):
+def struct_stats_barplot(stat_file, city,threshold_list):
 
     df = pd.read_csv(stat_file)
 
     for category in df['Category'].unique():
         cat_df = df[df['Category'] == category]
-
+        cat_df = cat_df[cat_df['Threshold'].isin(threshold_list)]
         pivot_df = cat_df.pivot_table(
             index='Threshold',
             columns='Frequency',
@@ -167,7 +183,7 @@ def struct_stats_barplot(stat_file, city):
         hatches = ['/','\\']
 
 
-        plt.figure(figsize=(8,8))
+        plt.figure(figsize=(4,4))
 
         plt.rcParams['axes.linewidth'] = 2.0
         plt.rcParams["font.family"] = "Times New Roman"
@@ -176,7 +192,7 @@ def struct_stats_barplot(stat_file, city):
             'xtick.labelsize': 14,
             'ytick.labelsize': 14,
             'axes.titlesize': 0,
-            'xtick.major.pad': 1,
+            'xtick.major.pad': 0,
             'ytick.major.pad': 0,}
 
         plt.rcParams.update(parameters)
@@ -190,7 +206,7 @@ def struct_stats_barplot(stat_file, city):
                     hatch=hatches[i],
                     edgecolor=hatch_color,
                     linewidth=line_sizes[i],
-                    label='Existing')
+                    label='Existing' if i==1 else '')
         plt.rcParams['hatch.linewidth'] = 3
         plt.bar(x - width/2, pivot_df['Newly_Affected_Medium'], bottom=pivot_df['Existing'], hatch='/',edgecolor=color_med,linewidth = 2,
                 width=width, color=color_med_light, label='Medium Freq')
@@ -200,7 +216,7 @@ def struct_stats_barplot(stat_file, city):
         
         plt.xticks(x, pivot_df['Threshold'])
         plt.xlabel("Noise Threshold (dBA)")
-        plt.ylabel(f'Number of {category} Impacted')
+        plt.ylabel(f'No. of {category} Impacted')
         plt.legend(title="")
         plt.tight_layout()
         plt.grid()
