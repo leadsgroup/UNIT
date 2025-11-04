@@ -33,7 +33,7 @@ The implementation centers on three modules:
 ## Expected inputs
 
 - Census tracts: GeoJSON (polygons) with tract geometries and census variables (household counts used by plotting/impact functions). Example: `Final_DFW_Data/DFW_53_High_Noise.geojson` and raw `DFWRawData/DFWHousing.geojson`.
-- Noise files (CSV): DOT sensor CSVs with `Longitude`, `Latitude`, `value` (or `L_dn`), and research noise CSVs with `Longitude`, `Latitude`, `L_dn`, etc. Example files are in `DFWRawData/` and `LARawDat/`.
+- Noise files (CSV): CSVs with `Longitude`, `Latitude`, and research noise CSVs with `Longitude`, `Latitude`, `L_dn`, etc. Example files are in `DFWRawData/` and `LARawDat/`.
 - Sensitive-structure CSVs: CSVs with `Longitude`, `Latitude` and other attributes for schools, hospitals, churches.
 
 An example dataset can be found here: https://drive.google.com/drive/folders/1iSdyvAMdHfDRQ2PiccRgtiSDFWTrRzvF?usp=drive_link 
