@@ -23,11 +23,9 @@ The implementation centers on three modules:
 
 - `UNIT.py` — example runner that demonstrates full workflow for LA and DFW (reads raw CSVs, reads geojson, saves results and plots).
 - `NoisePreProcess.py` — functions:
-	- `process_noise_impact` / `process_DOT_noise` — join point noise data to census tracts and save GeoJSON/CSV
-	- `sensitive_structs` — count sensitive structure points per tract
 	- `process_unique_research_noise` — create tract-level noise_count from a GeoDataFrame of unique research noise
-	- `difference_noise_pts` — remove research points that fall inside DOT clusters (DBSCAN + convex hull) returning unique research points
-	- `struct_in_contours` — detect structures inside existing DOT hulls and newly detected hulls and produce a summary DataFrame (also saves a plot)
+	- `difference_noise_pts` — returns unique noise points comapred to existing datasets
+	- `struct_in_contours` — detect structures inside existing noise hulls and newly detected hulls and produce a summary DataFrame
 - `Plots.py` — plotting and summary helpers: `compute_single_households`, `compute_impacted`, `plot_homes_impacted`, `hull_plots`, `struct_stats_barplot`, etc.
 
 ## Expected inputs
